@@ -1,6 +1,6 @@
-<?php 
+<?php
 
-abstract class Root 
+abstract class Root
 {
     public int $first_property;
     public int $pow_property;
@@ -25,13 +25,10 @@ abstract class Root
         return $this->pow_property;
     }
 
-  public function calculate(): int
-    {
-        return $this->first_property ** $this->pow_property;
-    }
+  abstract public function calculate(): mixed;
 }
 
-class Adder extends Root 
+class Adder extends Root
 {
     public int $additional_property;
 
@@ -47,11 +44,37 @@ class Adder extends Root
 
     public function sum_properties(): int
     {
-        return $this->calculate() + $this->additional_property;
+        return $this->get_first_property() + $this->get_pow_property() + $this->additional_property;
     }
+
+    public function calculate(): int | float
+    {
+      return $this->sum_properties();
+    }
+
 }
 
-class Multiplier extends Root 
+final class FinalAdder extends Adder
+{
+  private int $final_property;
+
+  public function set_final_property(int $value): void
+  {
+    $this->final_property = $value;
+  }
+
+  public function get_final_property(): int
+  {
+    return $this->final_property;
+  }
+
+  public function add_final_property(): int
+  {
+    return $this->calculate() + $this->final_property;
+  }
+}
+
+class Multiplier extends Root
 {
     public int $factor;
 
@@ -67,40 +90,53 @@ class Multiplier extends Root
 
     public function multiply_properties(): int
     {
-        return $this->calculate() * $this->factor;
+        return $this->get_first_property() * $this->get_pow_property() * $this->factor;
+    }
+
+    public function calculate(): int
+    {
+      return $this->multiply_properties();
     }
 }
 
-class Divider extends Root 
+class Divider extends Root
 {
-    private int $divisor;
+    public int $divisor;
 
-    public function set_divisor(int $value): void
-    {
-        $this->divisor = $value;
+  public function set_divisor(int $value): void
+  {
+    if ($value === 0) {
+      throw new Exception("Division by 0 is not allowed");
     }
+    $this->divisor = $value;
+  }
 
     public function get_divisor(): int
     {
         return $this->divisor;
     }
 
-    public function divide_properties(): float
+    public function divide_properties(): float | int | null
     {
-        if ($this->divisor === 0) {
-            throw new Exception("Division by 0 is not allowed");
-        }
-        return $this->calculate() / $this->divisor;
+      return ($this->get_first_property() + $this->get_pow_property()) / $this->divisor;
+    }
+
+    public function calculate(): float
+    {
+      return $this->divide_properties();
     }
 }
 
-class AdderChild1 extends Adder 
+class DividerChild extends Divider
 {
-    private int $child_property;
+    public int $child_property;
 
     public function set_child_property(int $value): void
     {
-        $this->child_property = $value;
+      if ($value === 0) {
+        throw new Exception("Division by 0 is not allowed");
+      }
+      $this->child_property = $value;
     }
 
     public function get_child_property(): int
@@ -108,112 +144,18 @@ class AdderChild1 extends Adder
         return $this->child_property;
     }
 
-    public function add_child_property(): int
+    public function divide_child_property(): float | int | null
     {
-        return $this->sum_properties() + $this->child_property;
-    }
-
-    public function add_with_root(): int
-    {
-        return $this->get_first_property() + $this->child_property;
-    }
-}
-
-class AdderChild2 extends Adder 
-{
-    private int $child_property;
-
-    public function set_child_property(int $value): void
-    {
-        $this->child_property = $value;
-    }
-
-    public function get_child_property(): int
-    {
-        return $this->child_property;
-    }
-
-    public function multiply_child_property(): int
-    {
-        return $this->sum_properties() * $this->child_property;
-    }
-
-    public function multiply_with_root(): int
-    {
-        return $this->get_first_property() * $this->child_property;
-    }
-}
-
-class DividerChild1 extends Divider 
-{
-    private int $child_property;
-
-    public function set_child_property(int $value): void
-    {
-        $this->child_property = $value;
-    }
-
-    public function get_child_property(): int
-    {
-        return $this->child_property;
-    }
-
-    public function subtract_child_property(): int
-    {
-        return $this->divide_properties() - $this->child_property;
-    }
-
-    public function subtract_with_root(): int
-    {
-        return $this->get_first_property() - $this->child_property;
-    }
-}
-
-class DividerChild2 extends Divider 
-{
-    private int $child_property;
-
-    public function set_child_property(int $value): void
-    {
-        $this->child_property = $value;
-    }
-
-    public function get_child_property(): int
-    {
-        return $this->child_property;
-    }
-
-    public function divide_child_property(): float
-    {
-        if ($this->child_property === 0) {
-            throw new Exception("Division by 0 is not allowed");
-        }
-        return $this->divide_properties() / $this->child_property;
+      return $this->divide_properties() / $this->child_property;
     }
 
     public function divide_with_root(): float
     {
-        if ($this->child_property === 0) {
-            throw new Exception("Division by 0 is not allowed");
-        }
         return $this->get_first_property() / $this->child_property;
     }
 }
 
-$adder = new AdderChild1();
-$adder->set_first_property(2);
-$adder->set_pow_property(3);
-$adder->set_additional_property(5);
-$adder->set_child_property(10);
-
-var_dump($adder->calculate());
-echo '<br>';
-var_dump($adder->sum_properties());
-echo '<br>';
-var_dump($adder->add_child_property());
-echo '<br>';
-
-$divider = new DividerChild2();
+$divider = new DividerChild();
 $divider->set_first_property(16);
 $divider->set_pow_property(2);
 $divider->set_divisor(4);
@@ -224,3 +166,14 @@ echo '<br>';
 var_dump($divider->divide_properties());
 echo '<br>';
 var_dump($divider->divide_child_property());
+echo '<br>';
+
+$finaladder = new FinalAdder();
+$finaladder->set_first_property(2);
+$finaladder->set_pow_property(3);
+$finaladder->set_additional_property(5);
+$finaladder->set_final_property(10);
+
+var_dump($finaladder->calculate());
+echo '<br>';
+var_dump($finaladder->add_final_property());
