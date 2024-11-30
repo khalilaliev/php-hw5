@@ -1,0 +1,23 @@
+{
+  "name": "khalilaliev/php-hw5",
+  "description": "composer php-hw6",
+  "type": "project",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "App\\": "App/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Khalil"
+    }
+  ],
+  "minimum-stability": "dev",
+  "require": {},
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true
+  }
+}
