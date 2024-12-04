@@ -20,4 +20,8 @@ class Gallery
   {
     echo 'This is Gallery page and method Delete';
   }
+  public function show()
+  {
+    echo 'This is the Show method of Gallery controller';
+  }
 }

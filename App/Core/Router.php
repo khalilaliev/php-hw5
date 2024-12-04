@@ -2,53 +2,52 @@
 
 namespace App\Core;
 
-class Router 
+final class Router 
 {
   const CONTROLLER_NAMESPACE = 'App\Controllers\\';
+  private array $routes;
+
+  public function __construct()
+  {
+    $this->routes = require __DIR__ . '/../config/controller.php';
+  }
 
   public function run() 
   {
-      $namespace = $this->get_namespace(); 
-      if (!class_exists($namespace)) {
-          $namespace = self::CONTROLLER_NAMESPACE . 'Error';
-      }
-      $controller = new $namespace;
-      $method = $this->get_method();
+      $uri = $this->get_current_uri();
 
-      if (method_exists($controller, $method)) {
-          $controller->$method();
+      if (isset($this->routes[$uri])) {
+        $route = $this->routes[$uri];
+        $this->dispatch($route['controller'], $route['method']);
       } else {
-          echo "Method '$method' not found";
+        $this->dispatch('Error', 'index');
       }
   }
 
-  private function get_namespace(): string
+  private function get_current_uri(): string
   {
-    $controller_name = $this->prepare_controllers_name();
-    if(is_string($controller_name)){
-      $namespace = $controller_name;
-    } else {
-      $namespace = $controller_name[1];
-    } 
-    return self::CONTROLLER_NAMESPACE . ucfirst($namespace);
-  } 
-
-  private function prepare_controllers_name(): array | string
-  {
-    $result = 'Main';
-    if(isset($_SERVER["REQUEST_URI"])){
-      $result = explode('/', $_SERVER["REQUEST_URI"]);
-    } 
-    if(is_array($result) && empty($result[1])){
-      return $result = 'Main';
-    }
-    return $result;
+      $uri = $_SERVER['REQUEST_URI'];
+      $uri = strtok($uri, '?'); 
+      return rtrim($uri, '/') ?: '/';
   }
 
-  private function get_method(): string 
+
+
+  private function dispatch(string $controller_name, string $method)
   {
-    $uri_parts = explode('/', trim($_SERVER["REQUEST_URI"], '/'));
-    return isset($uri_parts[1]) ? $uri_parts[1] : 'index';
+      $controller_class = self::CONTROLLER_NAMESPACE . ucfirst($controller_name);
+
+        if (class_exists($controller_class)) {
+          $controller = new $controller_class();
+
+          if (method_exists($controller, $method)) {
+              $controller->$method();
+          } else {
+              echo "Error: Method '$method' not found in controller '$controller_name'";
+          }
+      } else {
+          echo "Error: Controller '$controller_name' not found.";
+      }
   }
 
     
