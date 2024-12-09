@@ -6,6 +6,6 @@ class Dashboard
 {
     public function index()
     {
-      echo 'This is the Admin Dashboard page';
+      require __DIR__ . '/../../../App/views/admin/dashboard.php';
     }
 }

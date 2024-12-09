@@ -6,7 +6,7 @@ class Users
 {
     public function index()
     {
-      echo 'This is the Admin User page';
+      require __DIR__ . '/../../../App/views/admin/users/users.php';
     }
 
     public function create()

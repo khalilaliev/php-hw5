@@ -6,7 +6,7 @@ class Main
 {
   public function index()
   {
-    echo 'This is Main page';
+    require __DIR__ . '/../../App/views/public/main.php';
   }
   public function create()
   {
