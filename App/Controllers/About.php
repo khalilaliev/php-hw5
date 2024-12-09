@@ -6,7 +6,7 @@ class About
 {
   public function index()
   {
-    echo 'This is About page';
+    require __DIR__ . '/../../App/views/public/about.php';
   }
   public function create()
   {
